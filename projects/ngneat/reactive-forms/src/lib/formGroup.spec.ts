@@ -7,6 +7,7 @@ import { switchMap } from 'rxjs/operators';
 import { wrapIntoObservable } from './utils';
 import { diff } from './operators/diff';
 import { AbstractControlOf } from './types';
+import { Validators } from '@angular/forms';
 
 type Person = {
   name: string;
@@ -557,5 +558,41 @@ describe('FormGroup', () => {
         expect(control.getControl('skills')).toHaveLength(2);
       })
     );
+  });
+});
+
+describe('FormGroup validators', (): void => {
+  describe('when a form group has a control with a required validator', (): void => {
+    let formGroup: FormGroup<{ value: string }>;
+
+    beforeEach((): void => {
+      formGroup = new FormGroup<{ value: string }>({
+        value: new FormControl<string>('', Validators.required)
+      });
+    });
+
+    describe('when the control has a valid value', (): void => {
+      beforeEach((): void => {
+        formGroup.controls.value.setValue('valid');
+      });
+
+      it('should have a valid form group', (): void => {
+        expect.assertions(1);
+
+        expect(formGroup.valid).toStrictEqual(true);
+      });
+    });
+
+    describe.each([undefined, null, ''])('when the control has an invalid value of "%s"', (value): void => {
+      beforeEach((): void => {
+        formGroup.controls.value.setValue(value);
+      });
+
+      it('should have an invalid form group', (): void => {
+        expect.assertions(1);
+
+        expect(formGroup.invalid).toStrictEqual(true);
+      });
+    });
   });
 });
